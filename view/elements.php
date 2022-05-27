@@ -981,6 +981,11 @@ class Input extends HTMLElement {
         return $this;
     }
 
+    public function placeholder(?string $p): Input {
+        $this->setAttribute("placeholder", $p);
+
+        return $this;
+    }
 }
 
 /**

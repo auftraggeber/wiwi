@@ -16,14 +16,14 @@ class Machine extends Entity
 {
     /**
      * @param int $start
-     * @param int $lenght
+     * @param int $length
      * @return Machine[]
      */
-    public static function getMachines(int $start = 0, int $lenght = 30): array {
+    public static function getMachines(int $start = 0, int $length = 30): array {
         $arr = array();
         $statement = new Statement("select `id_machine` from `machine` limit ?,?");
 
-        $ids = $statement->execute($start, $lenght);
+        $ids = $statement->execute($start, $length);
 
         foreach ($ids as $id) {
             array_push($arr, new Machine($id));

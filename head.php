@@ -13,10 +13,10 @@ function buildHTMLDocument($title = "WIWI", $icon = null): \de\langner_dev\ui\ut
     $navbar = new NavBar("WIWI", );
 
     $navbar_list = new NavBarList();
-    $navbar_list_machine_item = new NavBarListItem("Maschinen", "machine");
 
     $navbar->addElement($navbar_list);
-    $navbar_list->addElement($navbar_list_machine_item);
+    $navbar_list->addElement(new NavBarListItem("Maschinen", "machine"));
+    $navbar_list->addElement(new NavBarListItem("Teile", "good"));
 
     $doc->addElement($navbar);
 

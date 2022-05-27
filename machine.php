@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 use de\langner_dev\ui\utils\document\Alert;
 use de\langner_dev\ui\utils\document\Button;
@@ -148,7 +146,7 @@ if (isset($_GET[EDIT_MACHINE_GET_ID_PARAM])) {
 
     $form_date_from_item_input_div = new Div();
     $form_date_from_item_input_div->col();
-    $form_date_from_item_input_div->addElement((new Input(FORM_CREATE_MACHINE_DATE_FROM, FORM_CREATE_MACHINE_DATE_FROM, "", "date"))->required()->value($from));
+    $form_date_from_item_input_div->addElement((new Input(FORM_CREATE_MACHINE_DATE_FROM, FORM_CREATE_MACHINE_DATE_FROM, "", "date"))->required()->value($from)->placeholder("Verfügbar ab"));
     $form_date_from_item->addElement($form_date_from_item_input_div);
     $form_date_from_item->addElement(new FormText("Geben Sie ein, ab wann die Maschine verwendet werden kann."));
 
@@ -166,9 +164,9 @@ if (isset($_GET[EDIT_MACHINE_GET_ID_PARAM])) {
 
     $form_date_to_item_input_div = new Div();
     $form_date_to_item_input_div->col();
-    $form_date_to_item_input_div->addElement((new Input(FORM_CREATE_MACHINE_DATE_TO, FORM_CREATE_MACHINE_DATE_TO, "", "date"))->value($to));
+    $form_date_to_item_input_div->addElement((new Input(FORM_CREATE_MACHINE_DATE_TO, FORM_CREATE_MACHINE_DATE_TO, "", "date"))->value($to)->placeholder("Verfügbar bis"));
     $form_date_to_item->addElement($form_date_to_item_input_div);
-    $form_date_to_item->addElement(new FormText("Geben Sie ein, bis wann die Maschine verwendet werden kann. <i>Optional</i>"));
+    $form_date_to_item->addElement(new FormText("<i>Optional</i><br/>Geben Sie ein, bis wann die Maschine verwendet werden kann."));
 
 
     $form->addElement($form_date_to_item);
@@ -214,7 +212,8 @@ $doc->setUrl("machine");
 
 
 
-$table_section = new Section("Verfügbare Maschinen", "h2", "container-xl");
+$table_section = new Section("Verfügbare Maschinen", "h2");
+$table_section->container_xl();
 $table_section->pb_0();
 
 $table_section->addElement((new WarningAlert("Beachten Sie, dass Kapazitätsänderungen nur in zukünftigen Arbeitsaufträgen wirksam sind."))->mt_1()->mb_2());

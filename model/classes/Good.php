@@ -15,6 +15,23 @@ use de\langner_dev\wiwi\model\utils\Statement;
 class Good extends Entity
 {
 
+    /**
+     * @return array Good[]
+     */
+    public static function getGoods(int $start = 0, int $length = 500): array {
+        $ret = (new Statement("select `id_good` from `good` limit ?,?"))->execute($start, $length);
+
+        $arr = array();
+
+        if (is_array($ret) && !empty($ret)) {
+            foreach ($ret as $id) {
+                array_push($arr, new Good($id));
+            }
+        }
+
+        return $arr;
+    }
+
     private $name;
     private $position;
     private $sub_goods;
