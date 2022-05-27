@@ -114,14 +114,6 @@ class SQL
         else {
             // keine Verbindung gefunden
 
-            if (runsOnTestMachine()) {
-                $this->host = TEST_DATABASE_HOST;
-                $this->user = TEST_DATABASE_USER;
-                $this->password = TEST_DATABASE_PASSWORD;
-                $this->database_name = TEST_DATABASE_NAME;
-                $this->port = TEST_DATABASE_PORT;
-            }
-
             /* verbindung erstellen */
             $this->connection = mysqli_connect(
                 $this->host,
