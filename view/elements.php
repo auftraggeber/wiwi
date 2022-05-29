@@ -193,6 +193,7 @@ class Select extends HTMLElement {
 
     private $values;
     private $use_display_value;
+    private $disabled_keys = array();
 
     /**
      * Erstellt ein neues Select-Objekt.
@@ -206,7 +207,7 @@ class Select extends HTMLElement {
         ));
 
         $this->values = $values;
-        $this->use_display_value;
+        $this->use_display_value = $use_display_value;
     }
 
     public function printStart()
@@ -220,8 +221,10 @@ class Select extends HTMLElement {
 
             $html_value = ($this->use_display_value) ? $value : $key;
 
+            $disabled = (in_array($key, $this->disabled_keys)) ? " disabled" : "";
+
             ?>
-            <option value="<?php echo $html_value;?>"><?php echo $value; ?></option>
+            <option value="<?php echo $html_value;?>" <?php echo $disabled; ?>><?php echo $value; ?></option>
             <?php
         }
     }
@@ -231,6 +234,12 @@ class Select extends HTMLElement {
         ?>
         </select>
         <?php
+    }
+
+    public function addDisabledKey($key): Select {
+        array_push($this->disabled_keys, $key);
+
+        return $this;
     }
 }
 

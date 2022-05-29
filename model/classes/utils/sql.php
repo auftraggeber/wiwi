@@ -231,7 +231,6 @@ class Statement {
             $this->sql_query = $str;
         }
 
-
         if (strpos($this->sql_query, "insert into") === 0) {
             $sql = new SQL(false);
             $sql->query($this->sql_query);
@@ -263,10 +262,8 @@ $sql->query("create table if not exists `machine`(
 $sql->query("create table if not exists `good`(
     `id_good` integer primary key auto_increment,
     `name` varchar(16) not null unique,
-    `position` integer not null default -1,
     `main_good_id` integer default null,
-    `amount_for_main_good` integer not null default 1,
-    `duration` integer not null check ( `duration` >= 0 ),
+    `amount_for_main_good` integer not null default 1 check ( `amount_for_main_good` >= 1 ),
     foreign key (`main_good_id`) references `good`(`id_good`) on delete no action on update cascade 
 )");
 
@@ -279,11 +276,13 @@ $sql->query("create table if not exists `order`(
 $sql->query("create table if not exists `order_contains_good`(
     `order_id` integer not null,
     `good_id` integer not null,
+    `machine_id` integer not null,
     `amount` integer not null check ( `amount` > 0 ),
     `position` integer not null check ( `position` >= 0 ),
-    primary key (`order_id`, `good_id`),
+    primary key (`order_id`, `good_id`, `machine_id`),
     foreign key (`order_id`) references `order`(`id_order`) on delete cascade on update cascade,
-    foreign key (`good_id`) references `good`(`id_good`) on delete cascade on update cascade
+    foreign key (`good_id`) references `good`(`id_good`) on delete cascade on update cascade,
+    foreign key (`machine_id`) references `machine`(`id_machine`) on delete cascade on update cascade 
 )");
 
 $sql->query("create table if not exists `schedule`(
@@ -291,6 +290,7 @@ $sql->query("create table if not exists `schedule`(
     `order_id` integer not null,
     `machine_id` integer not null,
     `position` integer not null check ( `position` >= 0 ),
+    `date` date not null,
     primary key (`good_id`, `order_id`, `machine_id`),
     foreign key (`good_id`) references `good`(`id_good`) on delete cascade on update cascade,
     foreign key (`order_id`) references `order`(`id_order`) on delete cascade on update cascade,

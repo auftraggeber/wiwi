@@ -2,6 +2,7 @@
 
 use de\langner_dev\ui\utils\document\Button;
 use de\langner_dev\ui\utils\document\Div;
+use de\langner_dev\ui\utils\document\ErrorAlert;
 use de\langner_dev\ui\utils\document\Form;
 use de\langner_dev\ui\utils\document\FormDivItem;
 use de\langner_dev\ui\utils\document\FormLabel;
@@ -9,14 +10,18 @@ use de\langner_dev\ui\utils\document\FormText;
 use de\langner_dev\ui\utils\document\Link;
 use de\langner_dev\ui\utils\document\NumberInput;
 use de\langner_dev\ui\utils\document\Section;
+use de\langner_dev\ui\utils\document\Select;
+use de\langner_dev\ui\utils\document\SubmitButton;
+use de\langner_dev\ui\utils\document\SuccessAlert;
 use de\langner_dev\ui\utils\document\TextInput;
+use de\langner_dev\wiwi\model\Good;
 
 require_once 'head.php';
 require_once 'model/classes/Good.php';
 
 define("FORM_CREATE_GOOD_NAME", "good-name");
-define("FORM_CREATE_GOOD_POSITION", "good-position");
-define("FORM_CREATE_GOOD_DURATION", "good-duration");
+define("FORM_CREATE_GOOD_MAIN_GOOD_AMOUNT", "good-amount");
+define("FORM_CREATE_GOOD_MAIN_GOOD_ID", "good-main-good-id");
 
 define("EDIT_GOOD_GET_ID_PARAM", "e");
 
@@ -38,6 +43,27 @@ $overview->addElement(
 
 $doc->addElement($overview);
 
+if (isset($_POST[FORM_CREATE_GOOD_NAME])) {
+    $name = $_POST[FORM_CREATE_GOOD_NAME];
+    $main_good = (isset($_POST[FORM_CREATE_GOOD_MAIN_GOOD_ID])) ? new Good($_POST[FORM_CREATE_GOOD_MAIN_GOOD_ID]) : null;
+
+    $main_amount = (isset($_POST[FORM_CREATE_GOOD_MAIN_GOOD_AMOUNT]) && $_POST[FORM_CREATE_GOOD_MAIN_GOOD_AMOUNT] != "") ? intval($_POST[FORM_CREATE_GOOD_MAIN_GOOD_AMOUNT]) : 1;
+
+    $good = new Good();
+    $good->setName($name);
+
+    if ($main_good != null && $main_good->exists())
+        $good->setMainGood($main_good);
+
+    $good->setAmount($main_amount);
+
+    if ($good->save()) {
+        $overview->addElement(new SuccessAlert("Das Teil konnte erfolgreich gesichert werden."));
+    }
+    else {
+        $overview->addElement(new ErrorAlert("Das Teil konnte nicht gesichert werden. Versuchen Sie es bitte später erneut."));
+    }
+}
 
 #
 #
@@ -59,36 +85,37 @@ if (isset($_GET[EDIT_GOOD_GET_ID_PARAM])) {
     $form_name_item->addElement((new TextInput(FORM_CREATE_GOOD_NAME, FORM_CREATE_GOOD_NAME))->required()->max_length(16)->placeholder("Name"));
     $form_name_item->addElement(new FormText("Geben Sie den Namen des Teils an. Der Name ist auf maximal 16 Zeichen begrenzt."));
 
-    $form_duration_item = new FormDivItem();
-    $form_duration_item->addElement(new FormLabel("Bearbeitungsdauer", FORM_CREATE_GOOD_DURATION));
-    $form_duration_item->addElement((new NumberInput(FORM_CREATE_GOOD_DURATION, 10, 1440, 1,FORM_CREATE_GOOD_DURATION))->required()->placeholder("Bearbeitungsdauer (min)"));
-    $form_duration_item->addElement(new FormText("Geben Sie die Bearbeitungszeit in Minuten an."));
+    $select_values = array(-1 => "--- Kein Hauptteil ---");
+
+    foreach (Good::getGoods() as $good) {
+        $select_values[$good->getId()] = $good->getName();
+    }
+
+    $select = new Select($select_values);
+    $select->setId(FORM_CREATE_GOOD_MAIN_GOOD_ID);
+    $select->setAttribute("name", FORM_CREATE_GOOD_MAIN_GOOD_ID);
+
+    $form_select_item = new FormDivItem();
+    $form_select_item->addElement(new FormLabel("Übergeordnetes Teil", FORM_CREATE_GOOD_MAIN_GOOD_ID));
+    $form_select_item->addElement($select);
+    $form_select_item->addElement(new FormText("Wählen Sie das übergeordnete Teil aus. Da Teile aus weiteren Teilen bestehen können, wird dieses Teil automatisch mit in den Auftrag des übergeordneten Teils einbezogen."));
 
     $form_position_item = new FormDivItem();
-    $form_position_item->addElement(new FormLabel("Position", FORM_CREATE_GOOD_POSITION));
-    $form_position_item->addElement((new NumberInput(FORM_CREATE_GOOD_POSITION, 0, null, 1, FORM_CREATE_GOOD_POSITION))->placeholder("Position"));
-    $form_position_item->addElement(new FormText("<i>Optional</i><br/>Wenn dieses Teil zu einem weiteren Teil gehört, gibt die Position an, welche Teile vor diesem fertig gestellt werden müssen. Falls zwei Subteile eines Teils gleichzeitig bearbeitet werden können, muss die Position gleich sein."));
+    $form_position_item->addElement(new FormLabel("Anzahl", FORM_CREATE_GOOD_MAIN_GOOD_AMOUNT));
+    $form_position_item->addElement((new NumberInput(FORM_CREATE_GOOD_MAIN_GOOD_AMOUNT, 1, null, 1, FORM_CREATE_GOOD_MAIN_GOOD_AMOUNT))->placeholder("Anzahl"));
+    $form_position_item->addElement(new FormText("<i>Optional</i><br/>Wenn dieses Teil zu einem weiteren Teil gehört, gibt die Anzahl an, wie viele Teile zu dem übergeordneten Teil gehören."));
 
 
     $form->addElement($form_name_item);
-    $form->addElement($form_duration_item);
+    $form->addElement($form_select_item);
     $form->addElement($form_position_item);
+    $form->addElement(new SubmitButton("Teil sichern", BS5_BUTTON_TYPE_PRIMARY));
 
     $create_section->addElement($form);
 
     $doc->addElement($create_section);
 }
 
-
-
-#
-#
-# Anzeige
-#
-#
-$table_section = new Section("Verfügbare Teile", "h2");
-$table_section->container_xl()->mb_5();
-
-
+$doc->setUrl("good");
 
 $doc->printHTMLText();

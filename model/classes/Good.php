@@ -16,7 +16,7 @@ class Good extends Entity
 {
 
     /**
-     * @return array Good[]
+     * @return Good[]
      */
     public static function getGoods(int $start = 0, int $length = 500): array {
         $ret = (new Statement("select `id_good` from `good` limit ?,?"))->execute($start, $length);
@@ -33,10 +33,8 @@ class Good extends Entity
     }
 
     private $name;
-    private $position;
     private $sub_goods;
     private $amount;
-    private $duration_in_mins;
     private $main_good_id;
 
     public function __construct($id = -1)
@@ -47,10 +45,8 @@ class Good extends Entity
     private function setDefaults($id = -1){
         $this->setId($id);
         $this->name = null;
-        $this->position = -1;
         $this->sub_goods = array();
         $this->amount = 0;
-        $this->duration_in_mins = 0;
         $this->main_good_id = null;
     }
 
@@ -62,10 +58,8 @@ class Good extends Entity
             if (is_array($ret) && !empty($ret)) {
                 $this->setId($ret[0]);
                 $this->name = $ret[1];
-                $this->position = intval($ret[2]);
-                $this->main_good_id = intval($ret[3]);
-                $this->amount = intval($ret[4]);
-                $this->duration_in_mins = intval($ret[5]);
+                $this->main_good_id = intval($ret[2]);
+                $this->amount = intval($ret[3]);
 
                 return;
             }
@@ -76,9 +70,9 @@ class Good extends Entity
 
     protected function create(): bool
     {
-        $s = new Statement("insert into `good`(`name`, `position`, `main_good_id`, `amount_for_main_good`, `duration`) values (?,?,?,?,?)");
+        $s = new Statement("insert into `good`(`name`, `main_good_id`, `amount_for_main_good`) values (?,?,?)");
 
-        $ret = $s->execute($this->name, $this->position, $this->main_good_id, $this->amount, $this->duration_in_mins);
+        $ret = $s->execute($this->name, $this->main_good_id, $this->amount);
 
         if (is_array($ret) && !empty($ret)) {
             $this->setId($ret[0]);
@@ -90,19 +84,17 @@ class Good extends Entity
 
     protected function update(): bool
     {
-        $s = new Statement("update `good` set `name` = ?, `position` = ?, `main_good_id` = ?, `amount_for_main_good` = ?, `duration` = ? where `id_good` = ?");
+        $s = new Statement("update `good` set `name` = ?, `main_good_id` = ?, `amount_for_main_good` = ? where `id_good` = ?");
 
         $name = $this->name;
-        $pos = $this->position;
         $main_id = $this->main_good_id;
         $amount = $this->amount;
-        $duration = $this->duration_in_mins;
 
-        $s->execute($name, $pos, $main_id, $amount, $duration, $this->getId());
+        $s->execute($name, $main_id, $amount, $this->getId());
 
         $this->load();
 
-        return ($name == $this->name && $pos == $this->position && $main_id == $this->main_good_id && $amount == $this->amount && $duration == $this->duration_in_mins);
+        return ($name == $this->name && $main_id == $this->main_good_id && $amount == $this->amount);
     }
 
     public function delete(): bool
