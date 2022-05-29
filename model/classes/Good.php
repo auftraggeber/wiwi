@@ -40,6 +40,7 @@ class Good extends Entity
     public function __construct($id = -1)
     {
         $this->setDefaults($id);
+        $this->load();
     }
 
     private function setDefaults($id = -1){
@@ -104,6 +105,8 @@ class Good extends Entity
         if ($this->exists()) {
             $s->execute($this->getId());
 
+            $this->load();
+
             return !$this->exists();
         }
 
@@ -120,15 +123,6 @@ class Good extends Entity
         $this->name = $name;
     }
 
-    public function getPosition(): int
-    {
-        return $this->position;
-    }
-
-    public function setPosition($position): void
-    {
-        $this->position = $position;
-    }
 
     /**
      * @return Good[]
@@ -139,7 +133,10 @@ class Good extends Entity
             $ret = (new Statement("select `id_good` from `good` where `main_good_id` = ?"))->execute($this->getId());
 
             if (is_array($ret) && !empty($ret)) {
-                array_push($this->sub_goods, new Good($ret[0]));
+
+                foreach ($ret as $id) {
+                    array_push($this->sub_goods, new Good($id));
+                }
             }
         }
 
@@ -159,16 +156,6 @@ class Good extends Entity
     public function setAmount($amount): void
     {
         $this->amount = $amount;
-    }
-
-    public function getDurationInMins(): int
-    {
-        return $this->duration_in_mins;
-    }
-
-    public function setDurationInMins($duration_in_mins): void
-    {
-        $this->duration_in_mins = $duration_in_mins;
     }
 
     public function getMainGood(): ?Good

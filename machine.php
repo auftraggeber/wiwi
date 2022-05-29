@@ -82,7 +82,7 @@ if (isset($_POST[FORM_CREATE_MACHINE_NAME]) && isset($_POST[FORM_CREATE_MACHINE_
     }
     else $overview->addElement(new ErrorAlert("Es ist ein Fehler beim Sichern aufgetreten. Versuchen Sie es später erneut."));
 }
-else
+
 if (isset($_GET[DELETE_MACHINE_GET_ID_PARAM]) && $_GET[DELETE_MACHINE_GET_ID_PARAM] != null) {
     $machine = new Machine($_GET[DELETE_MACHINE_GET_ID_PARAM]);
 

@@ -194,6 +194,7 @@ class Select extends HTMLElement {
     private $values;
     private $use_display_value;
     private $disabled_keys = array();
+    private $selected_key = null;
 
     /**
      * Erstellt ein neues Select-Objekt.
@@ -223,8 +224,10 @@ class Select extends HTMLElement {
 
             $disabled = (in_array($key, $this->disabled_keys)) ? " disabled" : "";
 
+            $selected = (isset($this->selected_key) && $this->selected_key == $key) ? " selected" : "";
+
             ?>
-            <option value="<?php echo $html_value;?>" <?php echo $disabled; ?>><?php echo $value; ?></option>
+            <option value="<?php echo $html_value;?>" <?php echo $disabled . $selected; ?>><?php echo $value; ?></option>
             <?php
         }
     }
@@ -240,6 +243,12 @@ class Select extends HTMLElement {
         array_push($this->disabled_keys, $key);
 
         return $this;
+    }
+
+
+    public function setSelectedKey($selected_key): void
+    {
+        $this->selected_key = $selected_key;
     }
 }
 
@@ -785,16 +794,20 @@ class TableBodyItem extends HTMLElement {
 
     private $content;
 
-    public function __construct(string $content = "", $attributes = array())
+    public function __construct($content_or_element = "", $attributes = array())
     {
         parent::__construct(array(), $attributes);
-        $this->content = $content;
+
+        if ($content_or_element instanceof HTMLElement) {
+            $this->addElement($content_or_element);
+        }
+        else $this->content = $content_or_element;
     }
 
     public function printStart()
     {
         $this->buildStartTag("td");
-        echo $this->content;
+        echo $this->content != null ? $this->content : "";
     }
 
     public function printEnd()
@@ -810,16 +823,25 @@ class Link extends HTMLElement {
 
     private $content;
 
-    public function __construct($content_or_element, $href)
+    public function __construct($content_or_element, $href = null)
     {
-        if (is_string($content_or_element))
-            $this->content = $content_or_element;
 
         if ($content_or_element instanceof HTMLElement) {
             $this->addElement($content_or_element);
         }
+        else
+            $this->content = $content_or_element;
 
-        parent::__construct(array(), array("href" => $href));
+        $attr = array();
+
+        if ($href != null)
+            $attr['href'] = $href;
+        else {
+            $this->addClass("text-decoration-none");
+        }
+
+
+        parent::__construct(array(), $attr);
     }
 
     public function printStart()

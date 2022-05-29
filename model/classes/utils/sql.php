@@ -231,6 +231,8 @@ class Statement {
             $this->sql_query = $str;
         }
 
+        // echo $this->sql_query;
+
         if (strpos($this->sql_query, "insert into") === 0) {
             $sql = new SQL(false);
             $sql->query($this->sql_query);
@@ -264,7 +266,7 @@ $sql->query("create table if not exists `good`(
     `name` varchar(16) not null unique,
     `main_good_id` integer default null,
     `amount_for_main_good` integer not null default 1 check ( `amount_for_main_good` >= 1 ),
-    foreign key (`main_good_id`) references `good`(`id_good`) on delete no action on update cascade 
+    foreign key (`main_good_id`) references `good`(`id_good`) on delete set null on update cascade 
 )");
 
 $sql->query("create table if not exists `order`(
