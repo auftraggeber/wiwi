@@ -16,6 +16,7 @@ function buildHTMLDocument($title = "WIWI", $icon = null): HTMLDocument {
     $navbar_list = new NavBarList();
 
     $navbar->addElement($navbar_list);
+    $navbar_list->addElement(new NavBarListItem("Aufträge", "order"));
     $navbar_list->addElement(new NavBarListItem("Maschinen", "machine"));
     $navbar_list->addElement(new NavBarListItem("Teile", "good"));
 

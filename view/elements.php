@@ -959,11 +959,13 @@ class FormText extends Div {
  */
 class Input extends HTMLElement {
 
-    public function __construct(string $name,  $id = null, string $placeholder = "", string $type = "text", $value = null, array $attributes = array())
+    public function __construct(string $name,  $id = null, ?string $placeholder = "", string $type = "text", $value = null, array $attributes = array())
     {
         $attributes["name"] = $name;
         $attributes["type"] = $type;
-        $attributes["placeholder"] = $placeholder;
+
+        if ($placeholder != null)
+            $attributes["placeholder"] = $placeholder;
 
         if ($value != null) {
             $attributes['value'] = $value;
@@ -1051,6 +1053,20 @@ class NumberInput extends Input {
         parent::__construct($name, $id, $placeholder, "number", $value, $attr);
     }
 }
+
+/**
+ * Ein klassisches HTML-Input-Element, in welches man Zahlen eingeben kann.
+ */
+class DateInput extends Input {
+
+    public function __construct(string $name, $id = null, $value = null)
+    {
+        $attr = array();
+
+        parent::__construct($name, $id, null, "date", $value, $attr);
+    }
+}
+
 
 
 /**
