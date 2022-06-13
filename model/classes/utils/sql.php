@@ -174,9 +174,6 @@ class SQL
                 $i++; // zählt +1
             }
 
-            if (count($return) == 1 && is_array($return[0]))
-                $return = $return[0];
-
             return $return;
         }
 
@@ -281,6 +278,7 @@ $sql->query("create table if not exists `order_contains_good`(
     `machine_id` integer not null,
     `amount` integer not null check ( `amount` > 0 ),
     `position` integer not null check ( `position` >= 0 ),
+    `time` integer not null check ( `time` > 0 ),
     primary key (`order_id`, `good_id`, `machine_id`),
     foreign key (`order_id`) references `order`(`id_order`) on delete cascade on update cascade,
     foreign key (`good_id`) references `good`(`id_good`) on delete cascade on update cascade,

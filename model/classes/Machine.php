@@ -61,6 +61,7 @@ class Machine extends Entity
 
 
         if (is_array($data) && !empty($data)) {
+            $data = $data[0];
             $this->name = strval($data[1]);
             $this->available_from_timestamp = strtotime($data[2]);
             $this->available_to_timestamp = ($data[3] == null) ? null : strtotime($data[3]);

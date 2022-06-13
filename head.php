@@ -26,7 +26,7 @@ function buildHTMLDocument($title = "WIWI", $icon = null): HTMLDocument {
 }
 
 function displayDate($time) {
-    if (!isset($time) || !is_int($time)) {
+    if (!isset($time) || !is_int($time) || $time <= 0) {
         return "";
     }
 

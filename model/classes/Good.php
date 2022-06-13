@@ -57,6 +57,7 @@ class Good extends Entity
             $ret = (new Statement("select * from `good` where `id_good` = ?"))->execute($this->getId());
 
             if (is_array($ret) && !empty($ret)) {
+                $ret = $ret[0];
                 $this->setId($ret[0]);
                 $this->name = $ret[1];
                 $this->main_good_id = intval($ret[2]);
