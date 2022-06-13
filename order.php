@@ -1,6 +1,7 @@
 <?php
 
 use de\langner_dev\ui\utils\document\Button;
+use de\langner_dev\ui\utils\document\Chart;
 use de\langner_dev\ui\utils\document\DateInput;
 use de\langner_dev\ui\utils\document\Div;
 use de\langner_dev\ui\utils\document\ErrorAlert;
@@ -9,6 +10,7 @@ use de\langner_dev\ui\utils\document\FormDivItem;
 use de\langner_dev\ui\utils\document\FormLabel;
 use de\langner_dev\ui\utils\document\FormText;
 use de\langner_dev\ui\utils\document\HiddenInput;
+use de\langner_dev\ui\utils\document\HorizontalScheduleBarChart;
 use de\langner_dev\ui\utils\document\Link;
 use de\langner_dev\ui\utils\document\NumberInput;
 use de\langner_dev\ui\utils\document\Section;
@@ -31,6 +33,8 @@ require_once 'head.php';
 require_once 'model/classes/Order.php';
 require_once 'model/classes/Good.php';
 require_once 'model/classes/Machine.php';
+
+define("SECS_PER_DAY", 60 * 60 * 24);
 
 define("FORM_EDIT_ORDER_ID", "order-id");
 define("FORM_CREATE_ORDER_NAME", "order-name");
@@ -429,6 +433,49 @@ else {
     $section->addElement($table_div);
 
     $doc->addElement($section);
+
+    $time_section = new Section("Ablauf", "h3");
+    $time_section->container_xl();
+
+    $chart = new HorizontalScheduleBarChart("orderTimeChart");
+    $chart->setTitle("Zeitplan");
+
+    $prev_machine = null;
+    $prev_end_time = 0;
+    $prev_date = null;
+
+    foreach ($details_order->getScheduledMachines() as $data) {
+        $machine = $data[0];
+        $good = $data[1];
+
+        $chart->addLabel($machine->getName());
+
+        if ($prev_machine != $machine || date("Y-m-d", $data[2]) != $prev_date) {
+            $prev_end_time = 0;
+        }
+
+        $abs_start_time = $details_order->getMinStartTimestamp();
+
+        $start_time = (($data[2] - $abs_start_time) / SECS_PER_DAY) + $prev_end_time;
+        $end_time = $start_time + ($data[3] / (60 * 24));
+
+        $prev_end_time = $end_time - $start_time;
+        $prev_machine = $machine;
+        $prev_date = date("Y-m-d", $data[2]);
+
+        $chart->addDataset($good->getName(), array(array($start_time,$end_time)), $chart->getIndexOfLabel($machine->getName()));
+    }
+
+    for ($i = 0; $i <= (($details_order->getEndDate() - $details_order->getMinStartTimestamp()) / SECS_PER_DAY); $i++) {
+        $timestamp = $details_order->getMinStartTimestamp() + ($i * SECS_PER_DAY);
+        $chart->addTick(displayDate($timestamp));
+    }
+
+    $time_section->addElement($chart);
+
+
+
+    $doc->addElement($time_section);
 }
 
 $doc->printHTMLText();

@@ -225,6 +225,12 @@ class Order extends Entity
         return $sum;
     }
 
+    private function isScheduled(Good $good, string $date) {
+        $ret = (new Statement("select * from `schedule` where `order_id` = ? and `good_id` = ? and `date` = ?"))->execute($this->getId(), $good->getId(), $date);
+
+        return is_array($ret) && !empty($ret);
+    }
+
     public function getScheduleOfGood(Good $good, Machine $machine): ?int {
         if (!$good->exists() || !$machine->exists()) {
             return null;
@@ -254,6 +260,8 @@ class Order extends Entity
         $timestamp = $this->getMinStartTimestamp();
         $pos_before = null;
 
+        $pos = 1;
+
         foreach ($this->getGoods() as $details) {
             $good = new Good($details[0]);
             $machine = new Machine($details[1]);
@@ -271,12 +279,29 @@ class Order extends Entity
             $current = $this->getCurrentSchedule($machine, $date);
 
 
-            while ($this->getScheduledTimeInMins($machine, $date, $current) + $time > ($machine->getCapacityPerDay() * 60)) {
+            while ($this->getScheduledTimeInMins($machine, $date, $current) + $time > ($machine->getCapacityPerDay() * 60) || $this->isScheduled($good, $date)) {
                 $timestamp += 3600 * 24;
                 $date = date("Y-m-d", $timestamp);
             }
 
-            (new Statement("insert into `schedule`(`good_id`, `order_id`, `machine_id`, `position`, `date`) values (?,?,?,?,?)"))->execute($good->getId(), $this->getId(), $machine->getId(), 1, $date);
+            (new Statement("insert into `schedule`(`good_id`, `order_id`, `machine_id`, `position`, `date`) values (?,?,?,?,?)"))->execute($good->getId(), $this->getId(), $machine->getId(), $pos, $date);
+            $pos++;
         }
+    }
+
+    public function getScheduledMachines() {
+        $ret = (new Statement("select `schedule`.`machine_id`, `schedule`.`good_id`, `schedule`.`date`, `order_contains_good`.`time` from `schedule`, `order_contains_good` where `schedule`.`order_id` = ? and `schedule`.`order_id` = `order_contains_good`.`order_id` and `schedule`.`good_id` = `order_contains_good`.`good_id` and `schedule`.`machine_id` = `order_contains_good`.`machine_id` order by date asc"))->execute($this->getId());
+
+        if (is_array($ret) && !empty($ret)) {
+            $arr = array();
+
+            foreach ($ret as $id) {
+                array_push($arr, array(new Machine($id[0]), new Good($id[1]), strtotime($id[2]), $id[3]));
+            }
+
+            return $arr;
+        }
+
+        return array();
     }
 }
