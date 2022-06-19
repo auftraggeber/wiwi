@@ -289,7 +289,7 @@ class Order extends Entity
         }
     }
 
-    public function getScheduledMachines() {
+    public function getScheduledMachines(): array {
         $ret = (new Statement("select `schedule`.`machine_id`, `schedule`.`good_id`, `schedule`.`date`, `order_contains_good`.`time` from `schedule`, `order_contains_good` where `schedule`.`order_id` = ? and `schedule`.`order_id` = `order_contains_good`.`order_id` and `schedule`.`good_id` = `order_contains_good`.`good_id` and `schedule`.`machine_id` = `order_contains_good`.`machine_id` order by date asc"))->execute($this->getId());
 
         if (is_array($ret) && !empty($ret)) {
@@ -303,5 +303,31 @@ class Order extends Entity
         }
 
         return array();
+    }
+
+    /**
+     * @return array Ein Array als Key ein Datum als Value ein Weiteres Array, welches die Maschinen-IDs und die zugehörige relative Kapazität liefert.
+     */
+    public function getScheduleOfDates(): array {
+        $ret = (new Statement("select `schedule`.`machine_id`, `order_contains_good`.`time`, `schedule`.`date` from `schedule`, `order_contains_good` where `schedule`.`order_id` = ? and `schedule`.`machine_id` = `order_contains_good`.`machine_id` and `schedule`.`order_id` = `order_contains_good`.`order_id` and `schedule`.`good_id` = `order_contains_good`.`good_id` order by `schedule`.`position` asc")
+        )->execute($this->getId());
+
+        $arr = array();
+
+        if (is_array($ret) && !empty($ret)) {
+
+            foreach ($ret as $data) {
+                $cap_per_day = (new Machine($data[0]))->getCapacityPerDay() * 60;
+                $data[2] = date("Y-m-d", strtotime($data[2]));
+
+                $data_arr = isset($arr[$data[2]]) && is_array($arr[$data[2]]) ? $arr[$data[2]] : array();
+
+                $data_arr[$data[0]] = $data[1] / $cap_per_day;
+
+                $arr[$data[2]] = $data_arr;
+            }
+        }
+
+        return $arr;
     }
 }
