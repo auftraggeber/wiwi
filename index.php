@@ -22,10 +22,11 @@ $doc->addElement($overview);
 
 $dataset = array();
 
-$min = strtotime("2022-06-01") / (3600 * 24);
-$max = strtotime("2022-06-31") / (3600 * 24);
+$min = strtotime("2022-01-01") / (3600 * 24);
+$max = strtotime("2022-12-31") / (3600 * 24);
 
 $orders = Order::getOrders();
+$times = Order::getScheduleMinMaxTimes();
 
 $chart = new StackedGroupBarChart("orders-chart");
 

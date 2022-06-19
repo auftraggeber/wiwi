@@ -30,6 +30,12 @@ class Order extends Entity
         return $arr;
     }
 
+    public static function getScheduleMinMaxTimes(): array {
+        $ret = (new Statement("select `date` from `schedule` order by `date` asc"))->execute();
+
+        return array(strtotime($ret[0]), strtotime($ret[count($ret) - 1]));
+    }
+
     private $name;
     private $min_start;
     private $goods;
