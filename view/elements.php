@@ -1258,7 +1258,7 @@ class HorizontalScheduleBarChart extends Chart {
 
             $data_arr = $this->data[$key];
 
-            array_push($array, array("label" => $key, "data" => $data_arr));
+            array_push($array, array("label" => $key, "data" => $data_arr, "backgroundColor" => "darkgray", "borderColor" => "darkgray"));
         }
 
         return $array;
