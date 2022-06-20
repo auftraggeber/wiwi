@@ -198,7 +198,7 @@ class Order extends Entity
 
     private function getCurrentSchedule(Machine $machine, string $min_date): array {
         $cur_sched_ret = (new Statement("select `schedule`.`date`, `schedule`.`position`, `schedule`.`good_id`, `order_contains_good`.`time` from `schedule`, `order_contains_good`" .
-            " where `schedule`.`order_id` = ? and `schedule`.`machine_id` = ? and `schedule`.`date` >= ? and `schedule`.`order_id` = `order_contains_good`.`order_id` and `schedule`.`machine_id` = `order_contains_good`.`machine_id` and `schedule`.`good_id` = `order_contains_good`.`good_id`"))->execute($this->getId(), $machine->getId(), $min_date);
+            " where `schedule`.`machine_id` = ? and `schedule`.`date` >= ? and `schedule`.`order_id` = `order_contains_good`.`order_id` and `schedule`.`machine_id` = `order_contains_good`.`machine_id` and `schedule`.`good_id` = `order_contains_good`.`good_id`"))->execute($machine->getId(), $min_date);
 
         $dates = array();
 
@@ -296,7 +296,7 @@ class Order extends Entity
     }
 
     public function getScheduledMachines(): array {
-        $ret = (new Statement("select `schedule`.`machine_id`, `schedule`.`good_id`, `schedule`.`date`, `order_contains_good`.`time` from `schedule`, `order_contains_good` where `schedule`.`order_id` = ? and `schedule`.`order_id` = `order_contains_good`.`order_id` and `schedule`.`good_id` = `order_contains_good`.`good_id` and `schedule`.`machine_id` = `order_contains_good`.`machine_id` order by date asc"))->execute($this->getId());
+        $ret = (new Statement("select distinct `schedule`.`machine_id`, `schedule`.`good_id`, `schedule`.`date`, `order_contains_good`.`time`, `order_contains_good`.`position` from `schedule`, `order_contains_good` where `schedule`.`order_id` = ? and `schedule`.`order_id` = `order_contains_good`.`order_id` and `schedule`.`good_id` = `order_contains_good`.`good_id` and `schedule`.`machine_id` = `order_contains_good`.`machine_id` order by date asc, schedule.position asc"))->execute($this->getId());
 
         if (is_array($ret) && !empty($ret)) {
             $arr = array();

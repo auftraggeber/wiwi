@@ -147,8 +147,8 @@ if (isset($_GET[EDIT_GOOD_GET_ID_PARAM])) {
 
 
     $form->addElement($form_name_item);
-    $form->addElement($form_select_item);
-    $form->addElement($form_position_item);
+    /*$form->addElement($form_select_item);
+    $form->addElement($form_position_item);*/
     $form->addElement(new SubmitButton("Teil sichern", BS5_BUTTON_TYPE_PRIMARY));
 
     $create_section->addElement($form);
@@ -171,7 +171,7 @@ $doc->setUrl("good");
 
 
 $section = new Section("Verfügbare Teile", "h2");
-$section->addElement((new WarningAlert("Beachten Sie, dass Sie auch die Subteile, die nicht mehr benötigt werden, entfernen."))->mt_1()->mb_2());
+//$section->addElement((new WarningAlert("Beachten Sie, dass Sie auch die Subteile, die nicht mehr benötigt werden, entfernen."))->mt_1()->mb_2());
 $section->container_xl();
 
 $table_div = new Div("", array("table-responsive"));
@@ -183,7 +183,7 @@ $thead_row = new TableRow();
 
 $thead_row->addElement(new TableHeadItem("#"));
 $thead_row->addElement(new TableHeadItem("Name"));
-$thead_row->addElement(new TableHeadItem("Subteile"));
+//$thead_row->addElement(new TableHeadItem("Subteile"));
 $thead_row->addElement(new TableHeadItem("Aktion"));
 
 $tbody = new TableBody();
@@ -191,7 +191,7 @@ $tbody = new TableBody();
 if (empty($goods)) {
     $row = new TableRow();
     $td = new TableBodyItem("Es existieren noch keine Teile.");
-    $td->setAttribute("colspan", 4);
+    $td->setAttribute("colspan", 3);
     $td->text_danger()->text_center();
     $row->addElement($td);
 
@@ -210,7 +210,7 @@ foreach ($goods as $good) {
     $subgoods = $good->getSubGoods();
 
     if (empty($subgoods)) {
-        $row->addElement((new TableBodyItem("Keine Subteile"))->text_danger());
+       // $row->addElement((new TableBodyItem("Keine Subteile"))->text_danger());
     }
     else {
         $str = "";
@@ -222,7 +222,7 @@ foreach ($goods as $good) {
             $str .= "<a href='#" . buildListId($subgood) . "'>" . $subgood->getName() . "</a><span class='ms-3'>x" . $subgood->getAmount() . "</span>";
         }
 
-        $row->addElement(new TableBodyItem($str));
+       // $row->addElement(new TableBodyItem($str));
     }
 
     $action_td = new TableBodyItem();

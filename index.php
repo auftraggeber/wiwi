@@ -15,10 +15,15 @@ $doc = buildHTMLDocument("index");
 $overview = new Section("WIWI - Kapazitätsplanung");
 $overview->container_xl();
 $overview->addElement(new Div(
-    "TODO"
+    "<p>Hier sehen Sie die verplante Fertigungskapazität. Es stehen Maschinen mit einem festen Kapazitätsangebot und die verschiedenen Teile zur Verfügung.<br/>"
+    ."Die verschiedenen Teile können durch Aufträge, welche Arbeitspläne beinhalten, die Kapazität der jeweiligen Maschinen beanspruchen.</p>".
+    "Im Diagramm unten sehen Sie, wie die sich die Aufträge auf das Kapazitätsangebot <i>(relativ)</i> auswirken.<br/>"
 ));
 
 $doc->addElement($overview);
+
+$chart_section = new Section("Plan", "h2");
+$chart_section->container_xl();
 
 $dataset = array();
 
@@ -29,6 +34,7 @@ $orders = Order::getOrders();
 $times = Order::getScheduleMinMaxTimes();
 
 $chart = new StackedGroupBarChart("orders-chart");
+$chart->setTitle("Plan");
 
 for ($i = $min; $i <= $max; $i++) {
     $time = $i * 3600 * 24;
@@ -47,6 +53,7 @@ foreach ($orders as $order) {
     }
 }
 
-$doc->addElement($chart);
+$chart_section->addElement($chart);
+$doc->addElement($chart_section);
 
 $doc->printHTMLText();

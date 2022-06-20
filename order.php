@@ -337,9 +337,9 @@ else {
        */
 
         $form_position = new FormDivItem();
-        $form_position->addElement(new FormLabel("Position", FORM_ADD_GOOD_POST_POSITION));
-        $form_position->addElement((new NumberInput(FORM_ADD_GOOD_POST_POSITION, 1, null, 1, FORM_ADD_GOOD_POST_POSITION))->required()->placeholder("Position")->value($position));
-        $form_position->addElement(new FormText("Geben Sie an, an welchem Schritt dieses Teil bearbeitet werden kann. Teile mit der gleichen Position können zeitgleich bearbeitet werden."));
+        $form_position->addElement(new FormLabel("Arbeitsgang", FORM_ADD_GOOD_POST_POSITION));
+        $form_position->addElement((new NumberInput(FORM_ADD_GOOD_POST_POSITION, 1, null, 1, FORM_ADD_GOOD_POST_POSITION))->required()->placeholder("Arbeitsgang")->value($position));
+        $form_position->addElement(new FormText("Geben Sie an, an welchem Schritt dieses Teil bearbeitet werden kann. Teile mit dem gleichen Arbeitsgang können zeitgleich bearbeitet werden."));
 
         $form_time = new FormDivItem();
         $form_time->addElement(new FormLabel("Bearbeitungszeit (min) pro Stück", FORM_ADD_GOOD_POST_TIME));
@@ -379,7 +379,7 @@ else {
     $thead_row->addElement(new TableHeadItem("Teil"));
     $thead_row->addElement(new TableHeadItem("Maschine"));
     //$thead_row->addElement(new TableHeadItem("Anzahl"));
-    $thead_row->addElement(new TableHeadItem("Position"));
+    $thead_row->addElement(new TableHeadItem("Arbeitsgang"));
     $thead_row->addElement(new TableHeadItem("Bearbeitungszeit (min)"));
     $thead_row->addElement(new TableHeadItem("Geplante Bearbeitung"));
     $thead_row->addElement(new TableHeadItem("Aktionen"));
@@ -440,30 +440,27 @@ else {
     $chart = new HorizontalScheduleBarChart("orderTimeChart");
     $chart->setTitle("Zeitplan");
 
-    $prev_machine = null;
-    $prev_end_time = 0;
-    $prev_date = null;
+    $prev_end_time = array();
+
 
     foreach ($details_order->getScheduledMachines() as $data) {
         $machine = $data[0];
         $good = $data[1];
+        $date = date("Y-m-d", $data[2]);
+        $dataset_name = $good->getName() . " - " . displayDate($data[2]);
 
         $chart->addLabel($machine->getName());
 
-        if ($prev_machine != $machine || date("Y-m-d", $data[2]) != $prev_date) {
-            $prev_end_time = 0;
-        }
-
         $abs_start_time = $details_order->getMinStartTimestamp();
 
-        $start_time = (($data[2] - $abs_start_time) / SECS_PER_DAY) + $prev_end_time;
+        $prev_end_time_value = $prev_end_time[$machine->getId()][$dataset_name] ?? 0;
+
+        $start_time = (($data[2] - $abs_start_time) / SECS_PER_DAY) + $prev_end_time_value;
         $end_time = $start_time + ($data[3] / (60 * 24));
 
-        $prev_end_time = $end_time - $start_time;
-        $prev_machine = $machine;
-        $prev_date = date("Y-m-d", $data[2]);
+        $prev_end_time[$machine->getId()][$dataset_name] = $end_time - $start_time;
 
-        $chart->addDataset($good->getName(), array(array($start_time,$end_time)), $chart->getIndexOfLabel($machine->getName()));
+        $chart->addDataset($dataset_name, array(array($start_time,$end_time)), $chart->getIndexOfLabel($machine->getName()));
     }
 
     for ($i = 0; $i <= (($details_order->getEndDate() - $details_order->getMinStartTimestamp()) / SECS_PER_DAY); $i++) {
