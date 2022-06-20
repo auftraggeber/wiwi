@@ -447,18 +447,18 @@ else {
         $machine = $data[0];
         $good = $data[1];
         $date = date("Y-m-d", $data[2]);
-        $dataset_name = $good->getName() . " - " . displayDate($data[2]);
+        $dataset_name = $good->getName();
 
         $chart->addLabel($machine->getName());
 
         $abs_start_time = $details_order->getMinStartTimestamp();
 
-        $prev_end_time_value = $prev_end_time[$machine->getId()][$dataset_name] ?? 0;
+        $prev_end_time_value = $prev_end_time[$machine->getId()][$data[2]] ?? 0;
 
         $start_time = (($data[2] - $abs_start_time) / SECS_PER_DAY) + $prev_end_time_value;
         $end_time = $start_time + ($data[3] / (60 * 24));
 
-        $prev_end_time[$machine->getId()][$dataset_name] = $end_time - $start_time;
+        $prev_end_time[$machine->getId()][$data[2]] = $end_time - $start_time;
 
         $chart->addDataset($dataset_name, array(array($start_time,$end_time)), $chart->getIndexOfLabel($machine->getName()));
     }
